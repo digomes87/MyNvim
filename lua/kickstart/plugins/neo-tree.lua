@@ -12,12 +12,17 @@ return {
   lazy = false,
   keys = {
     { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
+    -- Adicionando Cmd+B (D-b) e Ctrl+B (C-b) para alternar o Neo-tree
+    { '<D-b>', ':Neotree toggle<CR>', desc = 'Toggle NeoTree', silent = true },
+    { '<C-b>', ':Neotree toggle<CR>', desc = 'Toggle NeoTree', silent = true },
   },
   opts = {
     filesystem = {
       window = {
         mappings = {
           ['\\'] = 'close_window',
+          ['H'] = 'open_split',
+          ['V'] = 'open_vsplit',
         },
       },
     },
