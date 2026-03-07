@@ -6,6 +6,8 @@
 -- be extended to other languages as well. That's why it's called
 -- kickstart.nvim and not kitchen-sink.nvim ;)
 
+---@module 'lazy'
+---@type LazySpec
 return {
 	-- NOTE: Yes, you can install new plugins here!
 	'mfussenegger/nvim-dap',
@@ -100,27 +102,29 @@ return {
 			},
 		}
 
-		-- Dap UI setup
-		-- For more information, see |:help nvim-dap-ui|
-		dapui.setup {
-			-- Set icons to characters that are more likely to work in every terminal.
-			--    Feel free to remove or use ones that you like more! :)
-			--    Don't feel like these are good choices.
-			icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
-			controls = {
-				icons = {
-					pause = '⏸',
-					play = '▶',
-					step_into = '⏎',
-					step_over = '⏭',
-					step_out = '⏮',
-					step_back = 'b',
-					run_last = '▶▶',
-					terminate = '⏹',
-					disconnect = '⏏',
-				},
-			},
-		}
+    -- Dap UI setup
+    -- For more information, see |:help nvim-dap-ui|
+    ---@diagnostic disable-next-line: missing-fields
+    dapui.setup {
+      -- Set icons to characters that are more likely to work in every terminal.
+      --    Feel free to remove or use ones that you like more! :)
+      --    Don't feel like these are good choices.
+      icons = { expanded = '▾', collapsed = '▸', current_frame = '*' },
+      ---@diagnostic disable-next-line: missing-fields
+      controls = {
+        icons = {
+          pause = '⏸',
+          play = '▶',
+          step_into = '⏎',
+          step_over = '⏭',
+          step_out = '⏮',
+          step_back = 'b',
+          run_last = '▶▶',
+          terminate = '⏹',
+          disconnect = '⏏',
+        },
+      },
+    }
 
 		-- Change breakpoint icons
 		-- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
