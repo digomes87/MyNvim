@@ -25,6 +25,16 @@ return {
           ['V'] = 'open_vsplit',
         },
       },
+      filtered_items = {
+        visible = true, -- Mostrar arquivos ocultos por padrão
+        hide_dotfiles = false,
+        hide_gitignored = false,
+      },
+      follow_current_file = {
+        enabled = true, -- Seguir o arquivo que está sendo editado
+        leave_dirs_open = true, -- Manter diretórios abertos
+      },
+      use_libuv_file_watcher = true, -- Atualizar automaticamente quando houver mudanças no sistema de arquivos
     },
   },
 }
