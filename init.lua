@@ -10,6 +10,10 @@ vim.g.have_nerd_font = true
 -- Enable advanced Python highlighting (for regex fallback)
 vim.g.python_highlight_all = 1
 
+local swap_dir = vim.fn.stdpath('config') .. '/.swap//'
+vim.fn.mkdir(swap_dir, 'p')
+vim.opt.directory = swap_dir
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -527,6 +531,12 @@ require('lazy').setup({
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --  See `:help lsp-config` for information about keys and how to configure
       ---@type table<string, vim.lsp.Config>
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      local ok_blink, blink = pcall(require, 'blink.cmp')
+      if ok_blink and type(blink.get_lsp_capabilities) == 'function' then
+        capabilities = vim.tbl_deep_extend('force', capabilities, blink.get_lsp_capabilities())
+      end
+
       local servers = {
         -- clangd = {},
         -- gopls = {},
@@ -556,6 +566,37 @@ require('lazy').setup({
         --   },
         -- },
         pyright = {
+          root_dir = function(bufnr)
+            local util = require 'lspconfig.util'
+            local fname = bufnr
+            if type(bufnr) == 'number' then
+              fname = vim.api.nvim_buf_get_name(bufnr)
+            end
+            local root = util.root_pattern('pyrightconfig.json', 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git')(fname)
+            if root then
+              return root
+            end
+            if type(fname) == 'string' and fname ~= '' then
+              return vim.fs.dirname(fname)
+            end
+            return vim.fn.getcwd()
+          end,
+          on_init = function(client)
+            client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
+            local original_handler = client.handlers['textDocument/publishDiagnostics'] or vim.lsp.handlers['textDocument/publishDiagnostics']
+            client.handlers['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+              if result and result.diagnostics then
+                local filtered = {}
+                for _, diagnostic in ipairs(result.diagnostics) do
+                  if diagnostic.code ~= 'reportUnreachable' then
+                    filtered[#filtered + 1] = diagnostic
+                  end
+                end
+                result.diagnostics = filtered
+              end
+              return original_handler(err, result, ctx, config)
+            end
+          end,
           settings = {
             python = {
               analysis = {
@@ -563,11 +604,18 @@ require('lazy').setup({
                 useLibraryCodeForTypes = true,
                 diagnosticMode = 'workspace',
                 autoImportCompletions = true,
+                diagnosticSeverityOverrides = {
+                  reportAttributeAccessIssue = 'none',
+                  reportGeneralTypeIssues = 'none',
+                  reportUnreachable = 'none',
+                  reportUnusedCallResult = 'none',
+                  reportUnusedParameter = 'none',
+                  reportUnusedVariable = 'none',
+                },
               },
             },
           },
         },
-        stylua = {}, -- Used to format Lua code
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {
@@ -615,6 +663,7 @@ require('lazy').setup({
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       for name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
         vim.lsp.config(name, server)
         vim.lsp.enable(name)
       end
