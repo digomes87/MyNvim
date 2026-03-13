@@ -566,37 +566,8 @@ require('lazy').setup({
         --   },
         -- },
         pyright = {
-          root_dir = function(bufnr)
-            local util = require 'lspconfig.util'
-            local fname = bufnr
-            if type(bufnr) == 'number' then
-              fname = vim.api.nvim_buf_get_name(bufnr)
-            end
-            local root = util.root_pattern('pyrightconfig.json', 'pyproject.toml', 'setup.py', 'setup.cfg', 'requirements.txt', '.git')(fname)
-            if root then
-              return root
-            end
-            if type(fname) == 'string' and fname ~= '' then
-              return vim.fs.dirname(fname)
-            end
-            return vim.fn.getcwd()
-          end,
-          on_init = function(client)
-            client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
-            local original_handler = client.handlers['textDocument/publishDiagnostics'] or vim.lsp.handlers['textDocument/publishDiagnostics']
-            client.handlers['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
-              if result and result.diagnostics then
-                local filtered = {}
-                for _, diagnostic in ipairs(result.diagnostics) do
-                  if diagnostic.code ~= 'reportUnreachable' then
-                    filtered[#filtered + 1] = diagnostic
-                  end
-                end
-                result.diagnostics = filtered
-              end
-              return original_handler(err, result, ctx, config)
-            end
-          end,
+          cmd = { vim.fn.stdpath('data') .. '/mason/bin/pyright-langserver', '--stdio' },
+          filetypes = { 'python' },
           settings = {
             python = {
               analysis = {
@@ -713,7 +684,7 @@ require('lazy').setup({
 
   { -- Autocompletion
     'saghen/blink.cmp',
-    event = 'VimEnter',
+    lazy = false,
     version = '1.*',
     dependencies = {
       -- Snippet Engine
