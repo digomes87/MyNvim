@@ -11,3 +11,5 @@ spell/
 lazy-lock.json
 
 .DS_Store
+.swap
+teste.py
