@@ -272,8 +272,10 @@ require('lazy').setup({
                 for _, diagnostic in ipairs(result.diagnostics) do
                   local code = diagnostic.code
                   if type(code) == 'table' then code = code.value or code.code end
+                  local has_unnecessary_tag = diagnostic.tags and vim.tbl_contains(diagnostic.tags, 1)
                   if
-                    code ~= 'reportUnreachable'
+                    not has_unnecessary_tag
+                    and code ~= 'reportUnreachable'
                     and code ~= 'reportIncompatibleVariableOverride'
                     and code ~= 'reportIncompatibleMethodOverride'
                     and code ~= 'reportCallIssue'
