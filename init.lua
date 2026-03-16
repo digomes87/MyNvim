@@ -48,6 +48,10 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('n', '<Tab>', '<cmd>BufferLineCycleNext<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<S-Tab>', '<cmd>BufferLineCyclePrev<CR>', { desc = 'Previous buffer' })
+vim.keymap.set('n', '<leader>x', '<cmd>bdelete<CR>', { desc = 'Close buffer' })
+
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
@@ -82,6 +86,13 @@ require('lazy').setup({
         changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
       },
     },
+  },
+
+  {
+    'akinsho/bufferline.nvim',
+    version = '*',
+    dependencies = 'nvim-tree/nvim-web-devicons',
+    opts = {},
   },
 
   {
@@ -148,6 +159,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
+      vim.keymap.set('n', '<C-f>', builtin.find_files, { desc = 'Find files' })
+      vim.keymap.set('n', '<C-S-f>', builtin.live_grep, { desc = 'Live grep' })
+
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('telescope-lsp-attach', { clear = true }),
         callback = function(event)
@@ -161,19 +175,29 @@ require('lazy').setup({
         end,
       })
 
-      vim.keymap.set('n', '<leader>/', function()
-        builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
-          previewer = false,
-        })
-      end, { desc = '[/] Fuzzily search in current buffer' })
+      vim.keymap.set(
+        'n',
+        '<leader>/',
+        function()
+          builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+            winblend = 10,
+            previewer = false,
+          })
+        end,
+        { desc = '[/] Fuzzily search in current buffer' }
+      )
 
-      vim.keymap.set('n', '<leader>s/', function()
-        builtin.live_grep {
-          grep_open_files = true,
-          prompt_title = 'Live Grep in Open Files',
-        }
-      end, { desc = '[S]earch [/] in Open Files' })
+      vim.keymap.set(
+        'n',
+        '<leader>s/',
+        function()
+          builtin.live_grep {
+            grep_open_files = true,
+            prompt_title = 'Live Grep in Open Files',
+          }
+        end,
+        { desc = '[S]earch [/] in Open Files' }
+      )
 
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
     end,
@@ -240,18 +264,14 @@ require('lazy').setup({
         pyright = {
           cmd = { vim.fn.stdpath 'data' .. '/mason/bin/pyright-langserver', '--stdio' },
           filetypes = { 'python' },
-          on_init = function(client)
-            client.notify('workspace/didChangeConfiguration', { settings = client.config.settings })
-          end,
+          on_init = function(client) client.notify('workspace/didChangeConfiguration', { settings = client.config.settings }) end,
           handlers = {
             ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
               if result and result.diagnostics then
                 local filtered = {}
                 for _, diagnostic in ipairs(result.diagnostics) do
                   local code = diagnostic.code
-                  if type(code) == 'table' then
-                    code = code.value or code.code
-                  end
+                  if type(code) == 'table' then code = code.value or code.code end
                   if
                     code ~= 'reportUnreachable'
                     and code ~= 'reportIncompatibleVariableOverride'
@@ -283,6 +303,10 @@ require('lazy').setup({
                   reportUnusedVariable = 'none',
                   reportIncompatibleVariableOverride = 'none',
                   reportIncompatibleMethodOverride = 'none',
+                  reportMissingModuleSource = 'none',
+                  reportOperatorIssue = 'none',
+                  reportAssignmentType = 'none',
+                  reportReturnType = 'none',
                 },
               },
             },
