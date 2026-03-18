@@ -535,3 +535,20 @@ vim.api.nvim_create_autocmd('ColorScheme', {
     vim.api.nvim_set_hl(0, '@variable.python', { fg = '#569CD6', bold = true })
   end,
 })
+
+-- Configuração específica por linguagem
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'c', 'cpp' },
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.softtabstop = 4
+    vim.opt_local.expandtab = true
+    vim.opt_local.cindent = true
+    vim.opt_local.cinoptions = ':0,l1,g0,t0,(0'
+
+    -- Desativa o guess-indent para C/C++
+    vim.b.guessindent_disable = true
+  end,
+})
+
