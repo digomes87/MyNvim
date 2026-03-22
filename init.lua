@@ -339,6 +339,10 @@ require('lazy').setup({
             Lua = {},
           },
         },
+        clangd = {
+          cmd = { vim.fn.stdpath 'data' .. '/mason/bin/clangd' },
+          filetypes = { 'c', 'cpp' },
+        },
       }
 
       local ensure_installed = vim.tbl_keys(servers or {})
