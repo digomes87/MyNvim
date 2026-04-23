@@ -48,6 +48,10 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('x', 'p', '"_dP', { desc = 'Paste without overwriting register' })
+vim.keymap.set('n', '<leader>y', '"+y', { desc = 'Copy to clipboard' })
+vim.keymap.set('v', '<leader>y', '"+y', { desc = 'Copy to clipboard' })
+
 vim.keymap.set('n', '<Tab>', '<cmd>BufferLineCycleNext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<S-Tab>', '<cmd>BufferLineCyclePrev<CR>', { desc = 'Previous buffer' })
 vim.keymap.set('n', '<leader>x', '<cmd>bdelete<CR>', { desc = 'Close buffer' })
@@ -340,8 +344,23 @@ require('lazy').setup({
           },
         },
         clangd = {
-          cmd = { vim.fn.stdpath 'data' .. '/mason/bin/clangd' },
+          cmd = { '/Library/Developer/CommandLineTools/usr/bin/clangd' },
           filetypes = { 'c', 'cpp' },
+          init_options = {
+            compilationDatabasePath = 'build',
+          },
+        },
+
+        texlab = {
+          settings = {
+            texlab = {
+              build = {
+                executable = 'latexmk',
+                args = { '-pdf', '-interaction=nonstop', '-synctex=1', '%f' },
+                onSave = true,
+              },
+            },
+          },
         },
       }
 
@@ -486,6 +505,7 @@ require('lazy').setup({
         'python',
         'bash',
         'c',
+        'cpp',
         'diff',
         'html',
         'lua',
@@ -495,6 +515,7 @@ require('lazy').setup({
         'query',
         'vim',
         'vimdoc',
+        'latex',
       },
       auto_install = true,
       highlight = {
@@ -555,4 +576,3 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.b.guessindent_disable = true
   end,
 })
-
