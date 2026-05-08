@@ -5,9 +5,19 @@ vim.g.maplocalleader = ' '
 vim.g.have_nerd_font = true
 vim.g.python_highlight_all = 1
 
-local swap_dir = vim.fn.stdpath 'config' .. '/.swap//'
+local config_dir = vim.fn.stdpath 'config'
+
+local swap_dir = config_dir .. '/.swap//'
 vim.fn.mkdir(swap_dir, 'p')
 vim.opt.directory = swap_dir
+
+local shada_dir = config_dir .. '/.state/shada'
+vim.fn.mkdir(shada_dir, 'p')
+vim.opt.shadafile = shada_dir .. '/main.shada'
+
+local undo_dir = config_dir .. '/.undo//'
+vim.fn.mkdir(undo_dir, 'p')
+vim.opt.undodir = undo_dir
 
 vim.o.number = true
 vim.o.mouse = 'a'
