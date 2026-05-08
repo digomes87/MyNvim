@@ -114,6 +114,102 @@ nvim
 That's it! Lazy will install all the plugins you have. Use `:Lazy` to view
 the current plugin status. Hit `q` to close the window.
 
+## Updating your fork (step-by-step)
+
+This repository is a personal fork that tracks upstream changes from `nvim-lua/kickstart.nvim`.
+To keep your config stable, prefer syncing from the upstream `lazy` branch (the upstream `master`
+branch may include larger architectural changes that are not compatible with this repo).
+
+### 1) Update Neovim (the binary)
+
+Check your version:
+
+```sh
+nvim --version | head -n 3
+```
+
+On macOS with Homebrew:
+
+```sh
+brew update
+brew upgrade neovim
+```
+
+### 2) Update this config from upstream (kickstart)
+
+From your config directory:
+
+```sh
+cd ~/.config/nvim
+git status -sb
+git remote -v
+```
+
+Make sure you have both remotes:
+
+- `origin` points to your personal repo (example: `https://github.com/digomes87/MyNvim.git`)
+- `upstream` points to kickstart (example: `https://github.com/nvim-lua/kickstart.nvim.git`)
+
+If `upstream` is missing, add it:
+
+```sh
+git remote add upstream https://github.com/nvim-lua/kickstart.nvim.git
+```
+
+Create a safety branch before pulling changes:
+
+```sh
+git switch main
+git pull --ff-only origin main
+git branch "backup/pre-upstream-sync-$(date +%Y-%m-%d)"
+```
+
+Fetch upstream:
+
+```sh
+git fetch upstream --prune
+```
+
+Merge the upstream `lazy` branch:
+
+```sh
+git merge upstream/lazy
+```
+
+If you get conflicts:
+
+```sh
+git status
+git diff
+```
+
+Resolve conflicts by keeping your customizations while incorporating upstream structural changes,
+then stage and commit:
+
+```sh
+git add -A
+git commit -m "Merge upstream/lazy (kickstart.nvim updates)"
+```
+
+Verify Neovim starts (no startup errors):
+
+```sh
+nvim --headless +'qa'
+```
+
+Update plugins/parsers after a large update:
+
+```vim
+:Lazy sync
+:TSUpdate
+```
+
+Finally, push your updated config to your personal repo:
+
+```sh
+git push origin main
+```
+
 #### Read The Friendly Documentation
 
 Read through the `init.lua` file in your configuration folder for more
