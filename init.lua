@@ -282,7 +282,7 @@ require('lazy').setup({
         pyright = {
           cmd = { vim.fn.stdpath 'data' .. '/mason/bin/pyright-langserver', '--stdio' },
           filetypes = { 'python' },
-          on_init = function(client) client.notify('workspace/didChangeConfiguration', { settings = client.config.settings }) end,
+          on_init = function(client) client:notify('workspace/didChangeConfiguration', { settings = client.config.settings }) end,
           handlers = {
             ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
               if result and result.diagnostics then
@@ -303,7 +303,7 @@ require('lazy').setup({
                 end
                 result.diagnostics = filtered
               end
-              return vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+              return vim.lsp.handlers['textDocument/publishDiagnostics'](err, result, ctx, config)
             end,
           },
           settings = {
@@ -385,7 +385,8 @@ require('lazy').setup({
         rust_analyzer = {
           settings = {
             ['rust-analyzer'] = {
-              checkOnSave = {
+              checkOnSave = true,
+              check = {
                 command = 'clippy',
               },
               cargo = {
