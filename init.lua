@@ -36,8 +36,12 @@ vim.diagnostic.config {
   severity_sort = true,
   float = { border = 'rounded', source = 'if_many' },
   underline = { severity = { min = vim.diagnostic.severity.WARN } },
-  virtual_text = true,
-  virtual_lines = false,
+  virtual_text = false,
+  virtual_lines = {
+    -- Isso cria uma linha virtual abaixo do código com a mensagem completa
+    only_current_line = true, -- Mostra apenas na linha atual
+    highlight_whole_line = true, -- Destaca a linha inteira
+  },
   jump = { float = true },
 }
 
@@ -362,6 +366,19 @@ require('lazy').setup({
             },
           },
         },
+
+        rust_analyzer = {
+          settings = {
+            ['rust-analyzer'] = {
+              checkOnSave = {
+                command = 'clippy',
+              },
+              cargo = {
+                allFeatures = true,
+              },
+            },
+          },
+        },
       }
 
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -410,6 +427,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         python = { 'ruff_format', 'ruff_organize_imports' },
+        rust = { 'rustfmt' },
       },
     },
   },
@@ -516,6 +534,7 @@ require('lazy').setup({
         'vim',
         'vimdoc',
         'latex',
+        'rust',
       },
       auto_install = true,
       highlight = {
