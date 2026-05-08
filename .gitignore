@@ -16,4 +16,5 @@ lazy-lock.json
 .swap/
 .undo/
 .state/
+nvim.log
 teste.py
