@@ -31,7 +31,6 @@ return {
     local sources = {
       diagnostics.checkmake,
       formatting.prettier.with { filetypes = { 'html', 'json', 'yaml', 'markdown' } },
-      formatting.stylua,
       formatting.shfmt.with { args = { '-i', '4' } },
       formatting.terraform_fmt,
       -- require('none-ls.formatting.ruff').with { extra_args = { '--extend-select', 'I' } },

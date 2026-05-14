@@ -288,29 +288,6 @@ require('lazy').setup({
           cmd = { vim.fn.stdpath 'data' .. '/mason/bin/pyright-langserver', '--stdio' },
           filetypes = { 'python' },
           on_init = function(client) client:notify('workspace/didChangeConfiguration', { settings = client.config.settings }) end,
-          handlers = {
-            ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
-              if result and result.diagnostics then
-                local filtered = {}
-                for _, diagnostic in ipairs(result.diagnostics) do
-                  local code = diagnostic.code
-                  if type(code) == 'table' then code = code.value or code.code end
-                  local has_unnecessary_tag = diagnostic.tags and vim.tbl_contains(diagnostic.tags, 1)
-                  if
-                    not has_unnecessary_tag
-                    and code ~= 'reportUnreachable'
-                    and code ~= 'reportIncompatibleVariableOverride'
-                    and code ~= 'reportIncompatibleMethodOverride'
-                    and code ~= 'reportCallIssue'
-                  then
-                    filtered[#filtered + 1] = diagnostic
-                  end
-                end
-                result.diagnostics = filtered
-              end
-              return vim.lsp.handlers['textDocument/publishDiagnostics'](err, result, ctx, config)
-            end,
-          },
           settings = {
             python = {
               analysis = {
@@ -319,19 +296,11 @@ require('lazy').setup({
                 diagnosticMode = 'workspace',
                 autoImportCompletions = true,
                 diagnosticSeverityOverrides = {
-                  reportAttributeAccessIssue = 'none',
-                  reportCallIssue = 'none',
-                  reportGeneralTypeIssues = 'none',
                   reportUnreachable = 'none',
                   reportUnusedCallResult = 'none',
                   reportUnusedParameter = 'none',
                   reportUnusedVariable = 'none',
-                  reportIncompatibleVariableOverride = 'none',
-                  reportIncompatibleMethodOverride = 'none',
                   reportMissingModuleSource = 'none',
-                  reportOperatorIssue = 'none',
-                  reportAssignmentType = 'none',
-                  reportReturnType = 'none',
                 },
               },
             },
@@ -406,6 +375,7 @@ require('lazy').setup({
       vim.list_extend(ensure_installed, {
         'stylua',
         'ruff',
+        'markdownlint',
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -593,6 +563,8 @@ require('lazy').setup({
   require 'kickstart.plugins.debug',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
 
   { import = 'custom.plugins' },
 }, { ---@diagnostic disable-line: missing-fields
