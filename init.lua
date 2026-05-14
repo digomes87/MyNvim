@@ -19,18 +19,6 @@ local undo_dir = config_dir .. '/.undo//'
 vim.fn.mkdir(undo_dir, 'p')
 vim.opt.undodir = undo_dir
 
-do
-  local original_treesitter_start = vim.treesitter.start
-  vim.treesitter.start = function(bufnr, lang)
-    local target_buf = bufnr or 0
-    local ft = vim.bo[target_buf].filetype
-    if ft == 'markdown' or lang == 'markdown' or lang == 'markdown_inline' then
-      return
-    end
-    return original_treesitter_start(bufnr, lang)
-  end
-end
-
 vim.o.number = true
 vim.o.mouse = 'a'
 vim.o.showmode = false
@@ -520,7 +508,7 @@ require('lazy').setup({
           comments = { italic = false },
         },
       }
-      vim.cmd.colorscheme 'unokai'
+      vim.cmd.colorscheme 'tokyonight-moon'
     end,
   },
 
