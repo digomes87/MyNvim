@@ -639,27 +639,4 @@ vim.api.nvim_create_autocmd('BufEnter', {
   end,
 })
 
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = vim.api.nvim_create_augroup('pdf-preview', { clear = true }),
-  pattern = { '*.pdf' },
-  callback = function()
-    if vim.env.TERM ~= 'xterm-kitty' then return end
-    if vim.fn.executable 'pdftoppm' == 0 then return end
-    local ok, image = pcall(require, 'image')
-    if not ok then return end
-    vim.schedule(function()
-      local path = vim.api.nvim_buf_get_name(0)
-      local tmp = vim.fn.tempname()
-      vim.fn.system { 'pdftoppm', '-r', '150', '-f', '1', '-l', '1', '-png', '-singlefile', path, tmp }
-      local tmp_png = tmp .. '.png'
-      if vim.fn.filereadable(tmp_png) == 1 then
-        local img = image.from_file(tmp_png, {
-          buffer = vim.api.nvim_get_current_buf(),
-          window = vim.api.nvim_get_current_win(),
-          with_virtual_padding = true,
-        })
-        if img then img:render() end
-      end
-    end)
-  end,
-})
+require('custom.pdf').setup()
