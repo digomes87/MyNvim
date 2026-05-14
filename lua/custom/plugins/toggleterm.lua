@@ -17,16 +17,10 @@ return {
         shell = vim.o.shell, -- Usa o shell padrão
       }
 
-      -- Função para alternar terminal com <leader>tt
-      -- Usamos count=1 para garantir que é sempre o terminal 1 (ou criar um novo se não houver)
-      local Terminal = require('toggleterm.terminal').Terminal
-      
-      -- Mapeamento personalizado para <leader>tt
       vim.keymap.set('n', '<leader>tt', '<cmd>ToggleTerm direction=horizontal<CR>', { desc = '[T]oggle [T]erminal (Horizontal)' })
-      
-      -- Atalhos para facilitar a navegação dentro do terminal
-      function _G.set_terminal_keymaps()
-        local opts = {buffer = 0}
+
+      local function set_terminal_keymaps()
+        local opts = { buffer = 0 }
         vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
         vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
         vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
@@ -34,8 +28,10 @@ return {
         vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
       end
 
-      -- Aplica os atalhos apenas em buffers de terminal
-      vim.cmd('autocmd! TermOpen term://* lua set_terminal_keymaps()')
+      vim.api.nvim_create_autocmd('TermOpen', {
+        pattern = 'term://*',
+        callback = set_terminal_keymaps,
+      })
     end
   }
 }

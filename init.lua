@@ -3,7 +3,6 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 vim.g.have_nerd_font = true
-vim.g.python_highlight_all = 1
 
 local config_dir = vim.fn.stdpath 'config'
 
@@ -115,6 +114,7 @@ require('lazy').setup({
 
   {
     '3rd/image.nvim',
+    cond = function() return vim.env.TERM == 'xterm-kitty' end,
     opts = {
       backend = 'kitty',
       max_width = 100,
@@ -337,7 +337,7 @@ require('lazy').setup({
           },
         },
         clangd = {
-          cmd = { '/Library/Developer/CommandLineTools/usr/bin/clangd' },
+          cmd = { vim.fn.stdpath 'data' .. '/mason/bin/clangd' },
           filetypes = { 'c', 'cpp' },
           init_options = {
             compilationDatabasePath = 'build',
@@ -461,7 +461,7 @@ require('lazy').setup({
         list = { selection = { preselect = true, auto_insert = true } },
       },
       sources = {
-        default = { 'lsp', 'path', 'snippets' },
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
       snippets = { preset = 'luasnip' },
       fuzzy = { implementation = 'lua' },
