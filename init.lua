@@ -120,9 +120,7 @@ require('lazy').setup({
       max_width = 100,
       max_height = 40,
       integrations = {
-        markdown = {
-          enabled = false,
-        },
+        markdown = { enabled = false },
       },
     },
   },
@@ -619,5 +617,24 @@ vim.api.nvim_create_autocmd('FileType', {
     if vim.api.nvim_buf_is_valid(ev.buf) then
       pcall(vim.treesitter.stop, ev.buf)
     end
+  end,
+})
+
+vim.api.nvim_create_autocmd('BufEnter', {
+  group = vim.api.nvim_create_augroup('image-preview', { clear = true }),
+  pattern = { '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.bmp' },
+  callback = function()
+    if vim.env.TERM ~= 'xterm-kitty' then return end
+    local ok, image = pcall(require, 'image')
+    if not ok then return end
+    vim.schedule(function()
+      local path = vim.api.nvim_buf_get_name(0)
+      local img = image.from_file(path, {
+        buffer = vim.api.nvim_get_current_buf(),
+        window = vim.api.nvim_get_current_win(),
+        with_virtual_padding = true,
+      })
+      if img then img:render() end
+    end)
   end,
 })
