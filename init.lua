@@ -117,8 +117,6 @@ require('lazy').setup({
     cond = function() return vim.env.TERM == 'xterm-kitty' end,
     opts = {
       backend = 'kitty',
-      max_width = 100,
-      max_height = 40,
       integrations = {
         markdown = { enabled = false },
       },

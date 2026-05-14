@@ -35,10 +35,16 @@ local function render(bufnr, page)
     return
   end
 
+  local winid = vim.api.nvim_get_current_win()
+  local win_width = vim.api.nvim_win_get_width(winid)
+  local win_height = vim.api.nvim_win_get_height(winid)
+
   local img = image.from_file(png, {
     buffer = bufnr,
-    window = vim.api.nvim_get_current_win(),
+    window = winid,
     with_virtual_padding = true,
+    width = win_width,
+    height = win_height - 1,
   })
   if not img then
     vim.notify('[pdf] image.from_file retornou nil', vim.log.levels.WARN)
