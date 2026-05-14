@@ -16,7 +16,6 @@ local function render(bufnr, page)
     return
   end
 
-  -- Limpa imagem anterior pelo objeto armazenado
   if s.img then
     pcall(function() s.img:clear() end)
     s.img = nil
@@ -36,10 +35,9 @@ local function render(bufnr, page)
     return
   end
 
-  local winid = vim.api.nvim_get_current_win()
   local img = image.from_file(png, {
     buffer = bufnr,
-    window = winid,
+    window = vim.api.nvim_get_current_win(),
     with_virtual_padding = true,
   })
   if not img then
@@ -60,13 +58,13 @@ local function render(bufnr, page)
 end
 
 function M.setup()
-  vim.api.nvim_create_autocmd('BufEnter', {
+  vim.api.nvim_create_autocmd('BufReadPost', {
     group = vim.api.nvim_create_augroup('pdf-viewer', { clear = true }),
     pattern = '*.pdf',
     callback = function()
       if vim.env.TERM ~= 'xterm-kitty' then return end
       if vim.fn.executable 'pdftoppm' == 0 then
-        vim.notify('[pdf] pdftoppm não encontrado — instale: brew install poppler', vim.log.levels.WARN)
+        vim.notify('[pdf] instale: brew install poppler', vim.log.levels.WARN)
         return
       end
 
@@ -74,15 +72,22 @@ function M.setup()
       local winid = vim.api.nvim_get_current_win()
       local path = vim.api.nvim_buf_get_name(bufnr)
 
-      if not state[bufnr] then
-        state[bufnr] = { page = 1, total = get_page_count(path), path = path, img = nil }
-      end
+      -- Limpa o conteúdo binário do buffer e configura como viewer
+      vim.bo[bufnr].modifiable = true
+      vim.bo[bufnr].swapfile = false
+      vim.bo[bufnr].undolevels = -1
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, { '' })
+      vim.bo[bufnr].modified = false
+      vim.bo[bufnr].modifiable = false
 
       vim.wo[winid].number = false
       vim.wo[winid].relativenumber = false
       vim.wo[winid].signcolumn = 'no'
+      vim.wo[winid].wrap = false
 
-      vim.schedule(function() render(bufnr, state[bufnr].page) end)
+      state[bufnr] = { page = 1, total = get_page_count(path), path = path, img = nil }
+
+      vim.schedule(function() render(bufnr, 1) end)
 
       local function map(lhs, fn)
         vim.keymap.set('n', lhs, fn, { buffer = bufnr, silent = true })
