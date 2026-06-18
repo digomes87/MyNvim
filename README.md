@@ -10,6 +10,35 @@ A starting point for Neovim that is:
 
 **NOT** a Neovim distribution, but instead a starting point for your configuration.
 
+## Maintenance Log
+
+Histórico de manutenção do binário Neovim e do ambiente, para facilitar restore/contexto.
+
+### 2026-06-18 — Build Neovim v0.12.3 from source
+
+- **O quê:** Atualizei o binário do Neovim de `v0.12.2` (Homebrew) para `v0.12.3` (build estável from source).
+- **Por quê:** Preferência por build oficial from source em vez de Homebrew. `v0.12.3` é tag estável (só fixes sobre 0.12.2).
+- **Como (passos executados):**
+  ```sh
+  git clone --depth 1 --branch v0.12.3 https://github.com/neovim/neovim.git ~/neovim
+  cd ~/neovim
+  make CMAKE_BUILD_TYPE=Release CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=/usr/local"
+  sudo make install            # instala em /usr/local/bin/nvim
+  brew unlink neovim           # remove symlink brew p/ source ganhar no PATH
+  ```
+- **Estado resultante:**
+  - `nvim` ativo: `/usr/local/bin/nvim` → `NVIM v0.12.3` (Release).
+  - Homebrew neovim: ainda **instalado**, apenas **unlinked** (fallback disponível).
+  - Config (`~/.config/nvim`) e plugins (`lazy-lock.json`) **não alterados**.
+  - PATH: `/opt/homebrew/bin` vem antes de `/usr/local/bin`; o `brew unlink` é o que faz a versão source vencer.
+- **Como reverter (voltar ao brew):**
+  ```sh
+  brew link neovim             # restaura symlink do brew
+  sudo rm -f /usr/local/bin/nvim   # opcional: remove o binário source
+  hash -r                      # limpa cache de PATH do shell
+  ```
+- **Notas v0.12 (breaking changes relevantes p/ config):** `vim.diagnostic.disable()`/`is_disabled()` removidos; `vim.diff` → `vim.text.diff`; LSP JSON null vira `vim.NIL`; `i_CTRL-R` insere registrador literal; `'shelltemp'` default `false`. Novidades: `vim.pack` (gerenciador nativo), `:Undotree`, `:DiffTool`, LSP inline completion / code lens.
+
 ## Installation
 
 ### Install Neovim
