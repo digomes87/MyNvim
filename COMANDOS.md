@@ -6,7 +6,7 @@ Este documento resume os principais atalhos e comandos configurados no seu ambie
 
 - **Leader:** `Space` (Barra de Espaço)
 
-##Explorador de Arquivos (Neo-tree)
+## Explorador de Arquivos (Neo-tree)
 
 - **Alternar (Abrir/Fechar):** `Cmd+B` ou `Ctrl+B`
 - **Revelar arquivo atual:** `\`
@@ -15,24 +15,21 @@ Este documento resume os principais atalhos e comandos configurados no seu ambie
 - **Fechar janela do explorador:** `q`
 - **Criar/Deletar/Renomear:** Pressione `a` (add), `d` (delete) ou `r` (rename) sobre um arquivo/pasta.
 
-##Terminal Integrado
+## Terminal Integrado
 
-- **Abrir/Fechar Terminal (Horizontal):** `<leader>tt` ou `<leader>th` (Space + t + t)
-- **Abrir/Fechar Terminal (Vertical):** `<leader>tv` (Space + t + v)
-- **Abrir Múltiplos Terminais:** Digite o número antes do comando.
-    - Ex: `2<leader>tv` abre o terminal #2 ao lado do atual.
-    - Ex: `3<leader>tt` abre o terminal #3 horizontalmente.
+- **Abrir/Fechar Terminal:** `<leader>tt` (Space + t + t)
+- **Atalho padrão do plugin:** `<C-\>` (Ctrl + barra invertida)
 - **Navegar entre terminais:** Use `Ctrl + h/j/k/l` para mover o foco entre os terminais abertos.
-- **Sair do modo terminal (para Normal mode):** `Esc` (ou `Esc` + `Esc`)
+- **Sair do modo terminal (para Normal mode):** `Esc` + `Esc`
 
-##Edição e Comentários
+## Edição e Comentários
 
 - **Comentar/Descomentar linha:** `gcc`
 - **Comentar/Descomentar seleção:** Selecione com `v` e digite `gc`
 - **Salvar arquivo:** `:w`
 - **Sair:** `:q`
 
-##Navegação e Busca
+## Navegação e Busca
 
 - **Navegar entre janelas (splits):** `Ctrl` + `h` (esquerda), `j` (baixo), `k` (cima), `l` (direita)
 - **Ir para Definição:** `gd` (Go to Definition)
@@ -41,14 +38,14 @@ Este documento resume os principais atalhos e comandos configurados no seu ambie
 - **Buscar Texto (Grep):** `<leader>sg` (Search Grep)
 - **Buscar Buffers abertos:** `<leader><space>`
 
-##Autocomplete e Formatação
+## Autocomplete e Formatação
 
 - **Aceitar sugestão:** `Tab` ou `Enter`
 - **Navegar na lista:** `Ctrl+n` (próximo), `Ctrl+p` (anterior)
 - **Mostrar documentação:** `Ctrl+Space`
 - **Formatar arquivo:** `<leader>f` (Space + f)
 
-##Python (Especificidades)
+## Python (Especificidades)
 
 - **Organizar Imports:** Ocorre automaticamente ao salvar (via Ruff)
 - **Formatação PEP8:** Automática ao salvar (via Ruff)

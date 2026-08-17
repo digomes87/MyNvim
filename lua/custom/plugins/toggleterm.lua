@@ -21,7 +21,8 @@ return {
 
       local function set_terminal_keymaps()
         local opts = { buffer = 0 }
-        vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+        -- Não mapeamos <Esc> aqui; programas interativos (vi, less, htop)
+        -- precisam do Escape. Para sair do modo terminal use <Esc><Esc>.
         vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
         vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
         vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)

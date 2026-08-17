@@ -4,55 +4,13 @@ vim.g.maplocalleader = ' '
 
 vim.g.have_nerd_font = true
 
-local config_dir = vim.fn.stdpath 'config'
-
-local swap_dir = config_dir .. '/.swap//'
-vim.fn.mkdir(swap_dir, 'p')
-vim.opt.directory = swap_dir
-
-local shada_dir = config_dir .. '/.state/shada'
-vim.fn.mkdir(shada_dir, 'p')
-vim.opt.shadafile = shada_dir .. '/main.shada'
-
-local undo_dir = config_dir .. '/.undo//'
-vim.fn.mkdir(undo_dir, 'p')
-vim.opt.undodir = undo_dir
-
-vim.o.number = true
-vim.o.mouse = 'a'
-vim.o.showmode = false
-vim.schedule(function() vim.o.clipboard = 'unnamedplus' end)
-vim.o.breakindent = true
-vim.o.undofile = true
-vim.o.ignorecase = true
-vim.o.smartcase = true
-vim.o.signcolumn = 'yes'
-vim.o.updatetime = 250
-vim.o.timeoutlen = 300
-vim.o.splitright = true
-vim.o.splitbelow = true
-vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣', eol = '↲' }
-vim.o.inccommand = 'split'
-vim.o.cursorline = true
-vim.o.scrolloff = 10
-vim.o.confirm = true
+-- Carrega configurações pessoais separadas do upstream
+require 'custom.options'
+require 'custom.diagnostics'
+require 'custom.keymaps'
+require 'custom.autocmds'
 
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-
-vim.diagnostic.config {
-  update_in_insert = false,
-  severity_sort = true,
-  float = { border = 'rounded', source = 'if_many' },
-  underline = { severity = { min = vim.diagnostic.severity.WARN } },
-  virtual_text = false,
-  virtual_lines = {
-    -- Isso cria uma linha virtual abaixo do código com a mensagem completa
-    only_current_line = true, -- Mostra apenas na linha atual
-    highlight_whole_line = true, -- Destaca a linha inteira
-  },
-  jump = { float = true },
-}
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
@@ -64,10 +22,6 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('x', 'p', '"_dP', { desc = 'Paste without overwriting register' })
 vim.keymap.set('n', '<leader>y', '"+y', { desc = 'Copy to clipboard' })
 vim.keymap.set('v', '<leader>y', '"+y', { desc = 'Copy to clipboard' })
-
-vim.keymap.set('n', '<Tab>', '<cmd>BufferLineCycleNext<CR>', { desc = 'Next buffer' })
-vim.keymap.set('n', '<S-Tab>', '<cmd>BufferLineCyclePrev<CR>', { desc = 'Previous buffer' })
-vim.keymap.set('n', '<leader>x', '<cmd>bdelete<CR>', { desc = 'Close buffer' })
 
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
@@ -101,26 +55,6 @@ require('lazy').setup({
         delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
         topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
         changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      },
-    },
-  },
-
-  {
-    'akinsho/bufferline.nvim',
-    version = '*',
-    dependencies = 'nvim-tree/nvim-web-devicons',
-    opts = {},
-  },
-
-  {
-    '3rd/image.nvim',
-    cond = function() return vim.env.TERM == 'xterm-kitty' end,
-    opts = {
-      backend = 'kitty',
-      max_width_window_percentage = 100,
-      max_height_window_percentage = 100,
-      integrations = {
-        markdown = { enabled = false },
       },
     },
   },
@@ -224,207 +158,6 @@ require('lazy').setup({
     end,
   },
 
-  -- LSP Plugins
-  {
-    'neovim/nvim-lspconfig',
-    dependencies = {
-      { 'mason-org/mason.nvim', opts = {} },
-      'mason-org/mason-lspconfig.nvim',
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
-      { 'j-hui/fidget.nvim', opts = {} },
-      'saghen/blink.cmp',
-    },
-    config = function()
-      vim.api.nvim_create_autocmd('LspAttach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
-        callback = function(event)
-          local map = function(keys, func, desc, mode)
-            mode = mode or 'n'
-            vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
-          end
-
-          map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
-          map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-          map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client:supports_method('textDocument/documentHighlight', event.buf) then
-            local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.document_highlight,
-            })
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.clear_references,
-            })
-            vim.api.nvim_create_autocmd('LspDetach', {
-              group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-              callback = function(event2)
-                vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
-              end,
-            })
-          end
-
-          if client and client:supports_method('textDocument/inlayHint', event.buf) then
-            map('<leader>th', function() vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf }) end, '[T]oggle Inlay [H]ints')
-          end
-        end,
-      })
-
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      local ok_blink, blink = pcall(require, 'blink.cmp')
-      if ok_blink and type(blink.get_lsp_capabilities) == 'function' then
-        capabilities = vim.tbl_deep_extend('force', capabilities, blink.get_lsp_capabilities())
-      end
-
-      local servers = {
-        pyright = {
-          cmd = { vim.fn.stdpath 'data' .. '/mason/bin/pyright-langserver', '--stdio' },
-          filetypes = { 'python' },
-          on_init = function(client) client:notify('workspace/didChangeConfiguration', { settings = client.config.settings }) end,
-          settings = {
-            python = {
-              analysis = {
-                autoSearchPaths = true,
-                useLibraryCodeForTypes = true,
-                diagnosticMode = 'workspace',
-                autoImportCompletions = true,
-                diagnosticSeverityOverrides = {
-                  reportUnreachable = 'none',
-                  reportUnusedCallResult = 'none',
-                  reportUnusedParameter = 'none',
-                  reportUnusedVariable = 'none',
-                  reportMissingModuleSource = 'none',
-                },
-              },
-            },
-          },
-        },
-
-        lua_ls = {
-          on_init = function(client)
-            client.server_capabilities.documentFormattingProvider = false -- Disable formatting (formatting is done by stylua)
-
-            if client.workspace_folders then
-              local path = client.workspace_folders[1].name
-              if path ~= vim.fn.stdpath 'config' and (vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc')) then return end
-            end
-            client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
-              runtime = {
-                version = 'LuaJIT',
-                path = { 'lua/?.lua', 'lua/?/init.lua' },
-              },
-              workspace = {
-                checkThirdParty = false,
-                library = vim.tbl_extend('force', vim.api.nvim_get_runtime_file('', true), {
-                  '${3rd}/luv/library',
-                  '${3rd}/busted/library',
-                }),
-              },
-            })
-          end,
-          ---@type lspconfig.settings.lua_ls
-          settings = {
-            Lua = {
-              format = { enable = false }, -- Disable formatting (formatting is done by stylua)
-            },
-          },
-        },
-        clangd = {
-          cmd = { vim.fn.stdpath 'data' .. '/mason/bin/clangd' },
-          filetypes = { 'c', 'cpp' },
-          init_options = {
-            compilationDatabasePath = 'build',
-          },
-        },
-
-        texlab = {
-          settings = {
-            texlab = {
-              build = {
-                executable = 'latexmk',
-                args = { '-pdf', '-interaction=nonstop', '-synctex=1', '%f' },
-                onSave = true,
-              },
-            },
-          },
-        },
-
-        rust_analyzer = {
-          settings = {
-            ['rust-analyzer'] = {
-              checkOnSave = true,
-              check = {
-                command = 'clippy',
-              },
-              cargo = {
-                allFeatures = true,
-              },
-            },
-          },
-        },
-      }
-
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'stylua',
-        'ruff',
-        'markdownlint',
-      })
-
-      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
-
-      for name, server in pairs(servers) do
-        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-        vim.lsp.config(name, server)
-        vim.lsp.enable(name)
-      end
-    end,
-  },
-
-  {
-    'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
-    keys = {
-      {
-        '<leader>f',
-        function() require('conform').format { async = true } end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
-    },
-    ---@module 'conform'
-    ---@type conform.setupOpts
-    opts = {
-      notify_on_error = false,
-      format_on_save = function(bufnr)
-        local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
-      end,
-      default_format_opts = {
-        lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
-      },
-      -- You can also specify external formatters in here.
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        python = { 'ruff_format', 'ruff_organize_imports' },
-        rust = { 'rustfmt' },
-      },
-    },
-  },
-
   {
     'saghen/blink.cmp',
     lazy = false,
@@ -512,7 +245,7 @@ require('lazy').setup({
       --
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
-      -- - sr)'  - [S]urround [R]eplace [)] [']
+      -- - sr)'  - [S]urround [R]eplace [)] ['']
       require('mini.surround').setup()
       require('mini.comment').setup()
 
@@ -522,40 +255,6 @@ require('lazy').setup({
       ---@diagnostic disable-next-line: duplicate-set-field
       statusline.section_location = function() return '%2l:%-2v' end
     end,
-  },
-
-  {
-    'nvim-treesitter/nvim-treesitter',
-    lazy = false,
-    build = ':TSUpdate',
-    opts = {
-      ensure_installed = {
-        'typescript',
-        'javascript',
-        'python',
-        'bash',
-        'c',
-        'cpp',
-        'diff',
-        'html',
-        'lua',
-        'luadoc',
-        'markdown',
-        'markdown_inline',
-        'query',
-        'vim',
-        'vimdoc',
-        'latex',
-        'rust',
-      },
-      auto_install = true,
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = { 'ruby' },
-        disable = { 'markdown', 'markdown_inline' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
   },
 
   require 'kickstart.plugins.debug',
@@ -586,57 +285,5 @@ require('lazy').setup({
 })
 
 -- vim: ts=2 sts=2 sw=2 et
-
-vim.api.nvim_create_autocmd('ColorScheme', {
-  pattern = '*',
-  callback = function()
-    vim.api.nvim_set_hl(0, '@punctuation.special.python', { fg = '#e0af68', bold = true })
-    vim.api.nvim_set_hl(0, '@variable.python', { fg = '#569CD6', bold = true })
-  end,
-})
-
--- Configuração específica por linguagem
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'c', 'cpp' },
-  callback = function()
-    vim.opt_local.tabstop = 4
-    vim.opt_local.shiftwidth = 4
-    vim.opt_local.softtabstop = 4
-    vim.opt_local.expandtab = true
-    vim.opt_local.cindent = true
-    vim.opt_local.cinoptions = ':0,l1,g0,t0,(0'
-
-    -- Desativa o guess-indent para C/C++
-    vim.b.guessindent_disable = true
-  end,
-})
-
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'markdown' },
-  callback = function(ev)
-    if vim.api.nvim_buf_is_valid(ev.buf) then
-      pcall(vim.treesitter.stop, ev.buf)
-    end
-  end,
-})
-
-vim.api.nvim_create_autocmd('BufEnter', {
-  group = vim.api.nvim_create_augroup('image-preview', { clear = true }),
-  pattern = { '*.png', '*.jpg', '*.jpeg', '*.gif', '*.webp', '*.bmp' },
-  callback = function()
-    if vim.env.TERM ~= 'xterm-kitty' then return end
-    local ok, image = pcall(require, 'image')
-    if not ok then return end
-    vim.schedule(function()
-      local path = vim.api.nvim_buf_get_name(0)
-      local img = image.from_file(path, {
-        buffer = vim.api.nvim_get_current_buf(),
-        window = vim.api.nvim_get_current_win(),
-        with_virtual_padding = true,
-      })
-      if img then img:render() end
-    end)
-  end,
-})
 
 require('custom.pdf').setup()
