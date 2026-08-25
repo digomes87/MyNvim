@@ -3,7 +3,7 @@ return {
   config = function()
     require('auto-save').setup {
       enabled = true, -- Começa ativado
-      trigger_events = { 'InsertLeave', 'TextChanged' }, -- Salva ao sair do modo insert ou mudar texto
+      trigger_events = { 'InsertLeave' }, -- Salva só ao sair do modo insert (TextChanged disparava goimports no meio da digitação, removendo imports ainda não usados)
       execution_message = {
         message = function() -- Mensagem discreta ao salvar
           return ('AutoSave: saved at ' .. vim.fn.strftime '%H:%M:%S')
