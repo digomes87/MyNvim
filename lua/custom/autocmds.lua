@@ -38,9 +38,7 @@ vim.api.nvim_create_autocmd('FileType', {
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'markdown' },
   callback = function(ev)
-    if vim.api.nvim_buf_is_valid(ev.buf) then
-      pcall(vim.treesitter.stop, ev.buf)
-    end
+    if vim.api.nvim_buf_is_valid(ev.buf) then pcall(vim.treesitter.stop, ev.buf) end
   end,
 })
 
