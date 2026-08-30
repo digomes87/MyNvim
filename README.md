@@ -10,6 +10,44 @@ A starting point for Neovim that is:
 
 **NOT** a Neovim distribution, but instead a starting point for your configuration.
 
+## Tema
+
+O tema é configurado em um único lugar: `lua/custom/theme.lua`.
+
+Para trocar, edite a linha `ACTIVE` no topo do arquivo e reinicie o Neovim:
+
+```lua
+local ACTIVE = 'night-transparent'
+```
+
+Presets disponíveis:
+
+| ACTIVE                | Colorscheme            | Transparente |
+| --------------------- | ---------------------- | ------------ |
+| `moon`                | `tokyonight-moon`      | não          |
+| `moon-transparent`    | `tokyonight-moon`      | sim          |
+| `night-transparent`   | `tokyonight-night`     | sim          |
+| `storm-transparent`   | `tokyonight-storm`     | sim          |
+| `mocha-transparent`   | `catppuccin-mocha`     | sim          |
+| `macchiato`           | `catppuccin-macchiato` | não          |
+
+### Voltar ao tema anterior
+
+O estado anterior (tokyonight-moon opaco, definido inline no `init.lua`) está
+salvo na tag `theme-backup-tokyonight-moon`.
+
+- Rollback rápido: `ACTIVE = 'moon'` em `lua/custom/theme.lua`.
+- Rollback completo dos arquivos:
+
+```bash
+git checkout theme-backup-tokyonight-moon -- init.lua
+rm lua/custom/theme.lua
+```
+
+> A transparência depende do emulador de terminal: é preciso habilitar
+> background opacity/blur no terminal (Ghostty, WezTerm, kitty, iTerm2, Alacritty).
+> Sem isso, o fundo aparecerá preto sólido.
+
 ## Maintenance Log
 
 Histórico de manutenção do binário Neovim e do ambiente, para facilitar restore/contexto.
