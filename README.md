@@ -17,19 +17,51 @@ O tema é configurado em um único lugar: `lua/custom/theme.lua`.
 Para trocar, edite a linha `ACTIVE` no topo do arquivo e reinicie o Neovim:
 
 ```lua
-local ACTIVE = 'night-transparent'
+local ACTIVE = 'rose-pine-transparent'
 ```
 
 Presets disponíveis:
 
-| ACTIVE                | Colorscheme            | Transparente |
-| --------------------- | ---------------------- | ------------ |
-| `moon`                | `tokyonight-moon`      | não          |
-| `moon-transparent`    | `tokyonight-moon`      | sim          |
-| `night-transparent`   | `tokyonight-night`     | sim          |
-| `storm-transparent`   | `tokyonight-storm`     | sim          |
-| `mocha-transparent`   | `catppuccin-mocha`     | sim          |
-| `macchiato`           | `catppuccin-macchiato` | não          |
+| ACTIVE                  | Colorscheme            | Transparente |
+| ----------------------- | ---------------------- | ------------ |
+| `rose-pine-transparent` | `rose-pine-moon`       | sim (padrão) |
+| `rose-pine-main`        | `rose-pine`            | não          |
+| `moon`                  | `tokyonight-moon`      | não          |
+| `moon-transparent`      | `tokyonight-moon`      | sim          |
+| `night-transparent`     | `tokyonight-night`     | sim          |
+| `storm-transparent`     | `tokyonight-storm`     | sim          |
+| `mocha-transparent`     | `catppuccin-mocha`     | sim          |
+| `macchiato`             | `catppuccin-macchiato` | não          |
+
+O padrão é Rosé Pine porque a paleta do kitty (`~/.config/kitty/kitty.conf`)
+também é Rosé Pine — assim o fundo que aparece através da transparência é o
+mesmo da paleta do editor.
+
+### Transparência em camadas
+
+Os plugins de tema são carregados **opacos**. A transparência é aplicada
+seletivamente pelo módulo:
+
+- **Sem fundo:** buffer, número de linha, sign column, statusline, separadores.
+- **Com fundo (superfície elevada):** floats, popup menu, Telescope, Neo-tree,
+  Lazy, Mason.
+
+Isso é intencional. Deixar tudo transparente achata a interface e prejudica a
+leitura sobre o desktop; manter os painéis opacos preserva a hierarquia visual.
+
+### Blur do terminal
+
+A transparência real vem do kitty, não do Neovim:
+
+```conf
+background_opacity 0.92
+background_blur 64
+```
+
+Atalhos para calibrar ao vivo: `cmd+shift+↑` / `cmd+shift+↓`, e `cmd+shift+0`
+para voltar ao padrão. Recarregar a config do kitty: `ctrl+cmd+,`.
+
+Backup do kitty antes da mudança: `~/.config/kitty/kitty.conf.backup-preblur`.
 
 ### Voltar ao tema anterior
 
@@ -42,11 +74,8 @@ salvo na tag `theme-backup-tokyonight-moon`.
 ```bash
 git checkout theme-backup-tokyonight-moon -- init.lua
 rm lua/custom/theme.lua
+cp ~/.config/kitty/kitty.conf.backup-preblur ~/.config/kitty/kitty.conf
 ```
-
-> A transparência depende do emulador de terminal: é preciso habilitar
-> background opacity/blur no terminal (Ghostty, WezTerm, kitty, iTerm2, Alacritty).
-> Sem isso, o fundo aparecerá preto sólido.
 
 ## Maintenance Log
 
