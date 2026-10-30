@@ -1,51 +1,40 @@
 -- Prateleira de temas.
 --
--- Regra: exatamente UM spec com `enabled = true`. Os demais ficam
--- `enabled = false` — o lazy nem chega a baixá-los, então não pesam no
--- startup nem entram no lazy-lock.json.
+-- Cada tema tem três estados possíveis:
+--   * ATIVO      — enabled = true, lazy = false: baixa e aplica no startup.
+--   * INSTALADO  — enabled = true, lazy = true: baixa, mas só carrega quando
+--                  o colorscheme é invocado. São os temas do ciclo <leader>ct
+--                  e do seletor <leader>cs (custom/theme.lua). O config desses
+--                  só faz o setup; quem aplica é o :colorscheme.
+--   * PRATELEIRA — enabled = false: nem é baixado.
 --
--- Para experimentar outro tema:
---   1. `enabled = false` no tema atual
---   2. `enabled = true`  no tema novo
---   3. reinicie o Neovim e rode `:Lazy sync`
---
--- Cada spec já traz a configuração testada do tema, então voltar atrás é
--- só inverter os dois booleanos de novo.
+-- Para trocar o tema padrão de forma permanente, inverta os flags do ATIVO
+-- com os de um INSTALADO e rode :Lazy sync. Para experimentar sem
+-- compromisso, use <leader>ct (cicla) ou <leader>cs (seletor com preview).
 
 return {
   -----------------------------------------------------------------------
   -- ATIVO
   -----------------------------------------------------------------------
   {
-    'folke/tokyonight.nvim',
-    enabled = true,
-    priority = 1000,
-    config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false },
-        },
-      }
-      vim.cmd.colorscheme 'tokyonight-moon'
-    end,
-  },
-
-  -----------------------------------------------------------------------
-  -- PRATELEIRA — todos desligados
-  -----------------------------------------------------------------------
-  {
     'catppuccin/nvim',
     name = 'catppuccin',
-    enabled = false,
+    enabled = true,
+    lazy = false,
     priority = 1000,
     config = function()
       require('catppuccin').setup {
         flavour = 'mocha', -- latte, frappe, macchiato, mocha
+        term_colors = true,
+        styles = { comments = {} }, -- lista vazia = sem itálico
         integrations = {
+          bufferline = true,
           gitsigns = true,
+          indent_blankline = { enabled = true },
+          mini = true,
           neotree = true,
           telescope = { enabled = true },
+          toggleterm = true,
           treesitter = true,
           which_key = true,
         },
@@ -54,6 +43,44 @@ return {
     end,
   },
 
+  -----------------------------------------------------------------------
+  -- INSTALADOS — entram no ciclo <leader>ct / seletor <leader>cs
+  -----------------------------------------------------------------------
+  {
+    'folke/tokyonight.nvim',
+    enabled = true,
+    lazy = true,
+    config = function()
+      require('tokyonight').setup {
+        styles = {
+          comments = { italic = false },
+        },
+      }
+    end,
+  },
+
+  {
+    'rebelot/kanagawa.nvim',
+    enabled = true,
+    lazy = true,
+    config = function()
+      require('kanagawa').setup {
+        theme = 'wave', -- wave, dragon, lotus
+        commentStyle = { italic = false },
+      }
+    end,
+  },
+
+  {
+    'scottmckendry/cyberdream.nvim',
+    enabled = true,
+    lazy = true,
+    config = function() require('cyberdream').setup { variant = 'dark' } end,
+  },
+
+  -----------------------------------------------------------------------
+  -- PRATELEIRA — desligados
+  -----------------------------------------------------------------------
   {
     'rose-pine/neovim',
     name = 'rose-pine',
@@ -65,19 +92,6 @@ return {
         styles = { italic = false },
       }
       vim.cmd.colorscheme 'rose-pine'
-    end,
-  },
-
-  {
-    'rebelot/kanagawa.nvim',
-    enabled = false,
-    priority = 1000,
-    config = function()
-      require('kanagawa').setup {
-        theme = 'wave', -- wave, dragon, lotus
-        commentStyle = { italic = false },
-      }
-      vim.cmd.colorscheme 'kanagawa'
     end,
   },
 
@@ -103,16 +117,6 @@ return {
       vim.g.gruvbox_material_foreground = 'material'
       vim.g.gruvbox_material_better_performance = 1
       vim.cmd.colorscheme 'gruvbox-material'
-    end,
-  },
-
-  {
-    'scottmckendry/cyberdream.nvim',
-    enabled = false,
-    priority = 1000,
-    config = function()
-      require('cyberdream').setup { variant = 'dark' }
-      vim.cmd.colorscheme 'cyberdream'
     end,
   },
 

@@ -39,6 +39,13 @@ return {
     vim.keymap.set('n', '<C-f>', builtin.find_files, { desc = 'Find files' })
     vim.keymap.set('n', '<C-S-f>', builtin.live_grep, { desc = 'Live grep' })
 
+    -- Apelidos de uso diário: as mesmas buscas dos <leader>s*, mas com
+    -- uma tecla só. Os mnemônicos <leader>s* continuam valendo.
+    vim.keymap.set('n', '<leader>p', builtin.find_files, { desc = '[P]rocurar arquivos' })
+    vim.keymap.set('n', '<leader>g', builtin.live_grep, { desc = '[G]rep no projeto' })
+    vim.keymap.set('n', '<leader>o', builtin.buffers, { desc = 'Buffers abertos' })
+    vim.keymap.set('n', '<leader>r', builtin.oldfiles, { desc = 'Arquivos [R]ecentes' })
+
     vim.api.nvim_create_autocmd('LspAttach', {
       group = vim.api.nvim_create_augroup('telescope-lsp-attach', { clear = true }),
       callback = function(event)

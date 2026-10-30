@@ -9,12 +9,28 @@ vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHo
   end,
 })
 
--- Highlights customizados para Python
+-- Highlights customizados para Python, calibrados por tema (os hex eram
+-- do tokyonight; no catppuccin usam a paleta equivalente). Temas fora da
+-- lista ficam com a paleta própria do colorscheme.
+local python_hl = {
+  tokyonight = { var = '#569CD6', punct = '#e0af68' },
+  catppuccin = { var = '#89b4fa', punct = '#f9e2af' },
+}
+
 vim.api.nvim_create_autocmd('ColorScheme', {
   pattern = '*',
   callback = function()
-    vim.api.nvim_set_hl(0, '@punctuation.special.python', { fg = '#e0af68', bold = true })
-    vim.api.nvim_set_hl(0, '@variable.python', { fg = '#569CD6', bold = true })
+    local name = vim.g.colors_name or ''
+    local palette
+    for prefix, colors in pairs(python_hl) do
+      if name:sub(1, #prefix) == prefix then
+        palette = colors
+        break
+      end
+    end
+    if not palette then return end
+    vim.api.nvim_set_hl(0, '@punctuation.special.python', { fg = palette.punct, bold = true })
+    vim.api.nvim_set_hl(0, '@variable.python', { fg = palette.var, bold = true })
   end,
 })
 
