@@ -8,9 +8,10 @@
 --                  só faz o setup; quem aplica é o :colorscheme.
 --   * PRATELEIRA — enabled = false: nem é baixado.
 --
--- Para trocar o tema padrão de forma permanente, inverta os flags do ATIVO
--- com os de um INSTALADO e rode :Lazy sync. Para experimentar sem
--- compromisso, use <leader>ct (cicla) ou <leader>cs (seletor com preview).
+-- Para trocar o tema padrão de forma permanente, basta aplicar o tema
+-- desejado com <leader>ct (cicla) ou <leader>cs (seletor com preview):
+-- o último tema aplicado é salvo e restaurado no próximo startup
+-- (custom/theme.lua). O ATIVO abaixo é só o padrão de primeira execução.
 
 return {
   -----------------------------------------------------------------------
@@ -39,7 +40,11 @@ return {
           which_key = true,
         },
       }
-      vim.cmd.colorscheme 'catppuccin'
+      -- Restaura o último tema escolhido (custom/theme.lua);
+      -- sem tema salvo, o padrão é o catppuccin.
+      if not require('custom.theme').restore() then
+        vim.cmd.colorscheme 'catppuccin'
+      end
     end,
   },
 

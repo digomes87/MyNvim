@@ -132,9 +132,9 @@ horizontal, `V` em vertical, `q` fecha.
 | `Space ct` | Ciclar: catppuccin → tokyonight-moon → kanagawa → cyberdream |
 | `Space cs` | Seletor com preview (navegar já aplica; `Esc` desfaz, `Enter` mantém) |
 
-A troca vale só para a sessão. Para fixar um tema como padrão, inverta os
-flags `enabled`/`lazy` em `lua/custom/plugins/style.lua` (regra comentada no
-topo do arquivo) e rode `:Lazy sync`.
+O último tema aplicado fica salvo e é restaurado no próximo startup —
+trocar com `Space ct`/`Space cs` já fixa (persistência em
+`lua/custom/theme.lua`, gravando em `stdpath('state')/theme`).
 
 ## Autocomplete (blink.cmp)
 

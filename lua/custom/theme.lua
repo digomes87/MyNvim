@@ -1,24 +1,55 @@
 -- Troca rápida de tema em cima da prateleira de lua/custom/plugins/style.lua.
 --
--- O tema padrão é aplicado no startup pelo spec ATIVO (enabled = true,
--- lazy = false). Os temas INSTALADOS ficam com lazy = true: o lazy.nvim
+-- O tema escolhido persiste entre sessões: o autocmd abaixo salva cada
+-- colorscheme aplicado em stdpath('state')/theme, e o spec ATIVO de
+-- plugins/style.lua restaura o último no startup (sem tema salvo, aplica o
+-- padrão dele). Os temas INSTALADOS ficam com lazy = true: o lazy.nvim
 -- só carrega o plugin quando o colorscheme é invocado (handler de
 -- ColorSchemePre), então não pesam no startup.
 
 local M = {}
 
+-- Último tema aplicado (restaurado no próximo startup).
+local state_file = vim.fn.stdpath 'state' .. '/theme'
+
+-- Persiste o tema aplicado para a próxima sessão.
+vim.api.nvim_create_autocmd('ColorScheme', {
+  group = vim.api.nvim_create_augroup('theme-persist', { clear = true }),
+  callback = function()
+    local name = vim.g.colors_name
+    if not name then return end
+    local f = io.open(state_file, 'w')
+    if f then
+      f:write(name)
+      f:close()
+    end
+  end,
+})
+
 -- Colorschemes que entram no ciclo do <leader>ct.
 -- Para incluir outro, torne-o INSTALADO em plugins/style.lua e some aqui.
 M.list = {
+  'kanagawa',
   'catppuccin',
   'tokyonight-moon',
-  'kanagawa',
   'cyberdream',
 }
 
 function M.apply(name)
   vim.cmd.colorscheme(name)
   vim.notify('Tema: ' .. name, vim.log.levels.INFO)
+end
+
+--- Restaura o último tema salvo. Retorna false quando não há tema salvo
+--- ou quando ele não existe mais (aí o chamador aplica o padrão dele).
+function M.restore()
+  local f = io.open(state_file, 'r')
+  if not f then return false end
+  local name = f:read '*l'
+  f:close()
+  if not name or name == '' then return false end
+  if vim.g.colors_name == name then return true end
+  return pcall(vim.cmd.colorscheme, name)
 end
 
 --- Cicla para o próximo tema da lista (step = 1) ou o anterior (step = -1).
