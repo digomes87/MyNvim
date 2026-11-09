@@ -78,6 +78,30 @@ vim.api.nvim_create_autocmd('BufEnter', {
   end,
 })
 
+-- Apaga o buffer vazio [No Name] criado no startup (nvim sem arquivo) assim
+-- que um arquivo real é aberto; sem isso ele fica preso na bufferline.
+vim.api.nvim_create_autocmd('BufWinEnter', {
+  group = vim.api.nvim_create_augroup('wipe-no-name', { clear = true }),
+  callback = function(ev)
+    if vim.api.nvim_buf_get_name(ev.buf) == '' then return end
+    vim.schedule(function()
+      for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        if buf ~= ev.buf
+            and vim.api.nvim_buf_is_valid(buf)
+            and vim.api.nvim_buf_get_name(buf) == ''
+            and vim.bo[buf].buftype == ''
+            and not vim.bo[buf].modified
+            and vim.bo[buf].buflisted
+            and vim.api.nvim_buf_line_count(buf) == 1
+            and vim.api.nvim_buf_get_lines(buf, 0, -1, false)[1] == ''
+        then
+          pcall(vim.api.nvim_buf_delete, buf, {})
+        end
+      end
+    end)
+  end,
+})
+
 -- Destaca o texto copiado por um instante
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
