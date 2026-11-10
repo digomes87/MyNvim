@@ -31,7 +31,14 @@ vim.api.nvim_create_autocmd('ColorScheme', {
     if not palette then return end
     vim.api.nvim_set_hl(0, '@punctuation.special.python', { fg = palette.punct, bold = true })
     vim.api.nvim_set_hl(0, '@variable.python', { fg = palette.var, bold = true })
+    vim.api.nvim_set_hl(0, 'goBuiltinPrint', { fg = '#ff9e64', underline = true }) -- laranja: println/printf builtin em Go
   end,
+})
+
+-- Fallback caso o tema em uso não case com nenhum prefixo da lista acima
+vim.api.nvim_create_autocmd('ColorScheme', {
+  pattern = '*',
+  callback = function() vim.api.nvim_set_hl(0, 'goBuiltinPrint', { fg = '#ff9e64', underline = true }) end,
 })
 
 -- Configuração específica para C/C++
@@ -99,6 +106,39 @@ vim.api.nvim_create_autocmd('BufWinEnter', {
         end
       end
     end)
+  end,
+})
+
+-- Go: "autocorreção" e alerta para os builtins println/printf
+-- 1) iabbrev: digitar println/printf + espaço vira fmt.Println/fmt.Printf
+--    (o import é adicionado pelo goimports no save; Ctrl-] escapa da abrev)
+-- 2) highlight: qualquer println(/printf( builtin restante no buffer (colado,
+--    digitado com Ctrl-], etc.) fica sublinhado em laranja — o correto em Go
+--    é fmt.Println (P maiúsculo); o builtin escreve no stderr e não é o que
+--    você quer.
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('go-builtin-print', { clear = true }),
+  pattern = 'go',
+  callback = function(ev)
+    vim.api.nvim_buf_call(ev.buf, function()
+      vim.cmd [[iabbrev <buffer> println fmt.Println]]
+      vim.cmd [[iabbrev <buffer> printf fmt.Printf]]
+    end)
+
+    vim.fn.matchadd('goBuiltinPrint', [[\v<prin(tln|tf)>\ze\s*\(]]) -- ignora fmt.Println (P maiúsculo não casa) e println sem (
+  end,
+})
+
+-- Atualiza o destaque conforme o código muda (o matchadd sozinho cobre o
+-- buffer inteiro; só revalidamos ao entrar no buffer/mudar texto)
+vim.api.nvim_create_autocmd({ 'BufEnter', 'TextChanged', 'InsertLeave' }, {
+  group = vim.api.nvim_create_augroup('go-builtin-print-refresh', { clear = true }),
+  pattern = '*.go',
+  callback = function()
+    for _, m in ipairs(vim.fn.getmatches()) do
+      if m.group == 'goBuiltinPrint' then vim.fn.matchdelete(m.id) end
+    end
+    vim.fn.matchadd('goBuiltinPrint', [[\v<prin(tln|tf)>\ze\s*\(]])
   end,
 })
 

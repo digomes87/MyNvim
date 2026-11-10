@@ -27,6 +27,15 @@ vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = '[E]xplorad
 vim.keymap.set('n', '<leader>ct', function() require('custom.theme').cycle(1) end, { desc = 'Próximo tema' })
 vim.keymap.set('n', '<leader>cs', function() require('custom.theme').picker() end, { desc = 'Selecionar tema (preview)' })
 
+-- Recarrega arquivos alterados fora do nvim (ex.: edits do ZCode) e
+-- reinicia o LSP (gopls etc.) — resolve diagnósticos desatualizados
+-- tipo missingfieldormethod sem precisar fechar o nvim
+vim.keymap.set('n', '<leader>lR', function()
+  vim.cmd 'checktime'
+  vim.cmd 'LspRestart'
+  vim.notify('Buffers recarregados e LSP reiniciado', vim.log.levels.INFO)
+end, { desc = 'Recarregar arquivos + reiniciar LSP' })
+
 -- Abre o guia de atalhos (COMANDOS.md) em split lateral; q fecha
 vim.keymap.set('n', '<leader>?', function()
   vim.cmd.vsplit(vim.fn.stdpath 'config' .. '/COMANDOS.md')
